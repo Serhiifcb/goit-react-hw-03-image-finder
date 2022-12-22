@@ -19,7 +19,8 @@ export class App extends React.Component {
     modalImage: '',
     loading: false,
     error: null,
-    totalHits: null
+    totalHits: null,
+    hits: 0,
   }
 
   formSubmitHandler = searchImageText => {
@@ -28,6 +29,7 @@ export class App extends React.Component {
         searchImageText,
         page: 1,
         images: [],
+        hits: 0,
       });
     }
   }
@@ -50,7 +52,8 @@ export class App extends React.Component {
           .then(res => {
             this.setState(prevState => ({
               images: [...prevState.images, ...res.hits],  
-              totalHits: res.totalHits
+              totalHits: res.totalHits,
+              hits: prevState.hits + res.hits.length,
             }))
             if (res.totalHits === 0) {
               return toast.error('По Вашому запиту не знайдено жодної картинки!');
@@ -80,14 +83,14 @@ export class App extends React.Component {
   }
 
   render() {
-    const { loading, images, showModal, error, modalImage } = this.state;
+    const { loading, images, showModal, error, modalImage, totalHits, hits } = this.state;
   return (
     <div>
       {error && <h2 className={css.errorMessage}>Щось пішло не так. Немає відповіді на Ваш пошуковий запит</h2>}
       <Searchbar onSubmit={this.formSubmitHandler} />
       <ImageGallery images={images} toggleModal={this.toggleModal} setModalImage={this.setModalImage} />
       {showModal && <Modal toggleModal={this.toggleModal}><img src={modalImage} alt="modal" /></Modal>}
-      {(images.length > 0) && <Button
+      {(images.length > 0) && ((totalHits - hits) > 0) && <Button
           loadMore={this.loadMore}
         />}
       <ToastContainer autoClose={6000} />
